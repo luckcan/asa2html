@@ -41,11 +41,6 @@
 let headers = [];
 let data = [];
 
-const desiredOrder = [
-  "#", "Interface", "Source", "Destination", "Destination Service",
-  "Action", "Enabled", "Time", "Description", "Hits", "Logging"
-];
-
 const removedColumns = ["User", "Security Group", "Source Service"];
 
 document.getElementById('csvFile').addEventListener('change', function (e) {
@@ -71,7 +66,22 @@ document.getElementById('csvFile').addEventListener('change', function (e) {
       }
     });
 
+    let desiredOrder;
+  
+    if (headerMap.hasOwnProperty("Service")) {
+      desiredOrder = [
+        "Interface", "#", "Source", "Destination", "Service",
+        "Action", "Enabled", "Time", "Description", "Hits", "Logging"
+      ];
+    } else {
+      desiredOrder = [
+        "Interface", "#", "Source", "Destination", "Destination Service",
+        "Action", "Enabled", "Time", "Description", "Hits", "Logging"
+      ];
+    }
+
     headers = desiredOrder.filter(h => headerMap.hasOwnProperty(h));
+
     data = lines.slice(1).map(line => {
       const cells = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
         .map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"').replace(/\r?\n/g, '\n'));
@@ -82,6 +92,10 @@ document.getElementById('csvFile').addEventListener('change', function (e) {
         }
         if (h === "Description") {
             value = value.replace(/^\[|\]$/g, '').trim(); // Remove square brackets
+        }
+        if (h === "Enabled") {
+          value = value.toLowerCase() === "true" ? "Yes" :
+          value.toLowerCase() === "false" ? "No" : value;
         }
         return value;
     });
